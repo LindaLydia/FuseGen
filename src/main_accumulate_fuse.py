@@ -1275,7 +1275,7 @@ def train_to_converge_with_selection_kd_fused(args, model, train_data, theta, qu
     if final_test:
         if 'Reweight' in args.fuse_dataset_weight:
             print_info = ["weight-adjust-for-selection-kd-fused-(good-one-hot)", "fused_adjust_iter", "good_train_loss_selction_ft", "good_train_acc_selction_ft", "good_test_acc_selction_ft", "good_test_loss_selction_ft"]
-            high_quality_one_hot_theta, high_quality_one_hot_model_copy, _, _ = solve_reweight_v2(args, args.fused_model, train_data, _saved_theta, (high_quality_sample_rows, high_quality_sample_columns), train_loader_backward, valid_loader, test_loader, print_info=print_info, reweight_epoch=epoch_adjust//3, soft_label=None)
+            high_quality_one_hot_theta, high_quality_one_hot_model_copy, _, _ = solve_reweight_v2(args, args.fused_model, train_data, _saved_theta, (high_quality_sample_rows, high_quality_sample_columns), train_loader_backward, valid_loader, test_loader, print_info=print_info, reweight_epoch=epoch_adjust, soft_label=None)
         else:
             diverged = False
             selected_train_dataset = []
@@ -1315,7 +1315,7 @@ def train_to_converge_with_selection_kd_fused(args, model, train_data, theta, qu
                 theta = torch.tensor([_saved_theta[row][col] for row,col in zip(high_quality_sample_rows, high_quality_sample_columns)]).to(args.device)
                 train_iter = DataLoader(selected_train_data, batch_size=args.train_batch_size, shuffle=args.shuffle_train)
             # init_theta = copy.deepcopy(theta)
-            for epoch in range(epoch_adjust//3):
+            for epoch in range(epoch_adjust):
                 logging.debug(f"epoch #{epoch} for good-sample-one-hot")
                 current_outer_iter_trained_model = []
                 theta_mapped = copy.deepcopy(theta)
@@ -1382,7 +1382,7 @@ def train_to_converge_with_selection_kd_fused(args, model, train_data, theta, qu
     # (6) train on all the samples with 1-hot label
     if 'Reweight' in args.fuse_dataset_weight:
         print_info = ["weight-adjust-for-selection-kd-fused-(all-one-hot)", "fused_adjust_iter", "total_one_hot_train_loss_selction_ft", "total_one_hot_train_acc_selction_ft", "total_one_hot_test_acc_selction_ft", "total_one_hot_test_loss_selction_ft"]
-        total_one_hot_theta, total_one_hot_model_copy, _, _ = solve_reweight_v2(args, args.fused_model, train_data, _saved_theta, (high_quality_sample_rows, high_quality_sample_columns), train_loader_backward, valid_loader, test_loader, print_info=print_info, reweight_epoch=epoch_adjust//3, soft_label=None)
+        total_one_hot_theta, total_one_hot_model_copy, _, _ = solve_reweight_v2(args, args.fused_model, train_data, _saved_theta, (high_quality_sample_rows, high_quality_sample_columns), train_loader_backward, valid_loader, test_loader, print_info=print_info, reweight_epoch=epoch_adjust, soft_label=None)
     else:
         diverged = False
         if args.small_model_name.upper() == 'LSTM':
@@ -1404,7 +1404,7 @@ def train_to_converge_with_selection_kd_fused(args, model, train_data, theta, qu
             train_iter = DataLoader(selected_train_data, batch_size=args.train_batch_size, shuffle=args.shuffle_train)
             print(f"{len(selected_train_data)=}, {theta.shape=}")
         # init_theta = copy.deepcopy(theta)
-        for epoch in range(epoch_adjust//3):
+        for epoch in range(epoch_adjust):
             logging.debug(f"epoch #{epoch} for all-sample-one-hot")
             current_outer_iter_trained_model = []
             theta_mapped = copy.deepcopy(theta)
